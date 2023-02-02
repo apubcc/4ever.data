@@ -1,0 +1,20 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "clean": "pnpm hardhat clean",
+    "compile": "pnpm hardhat compile",
+    "dev": "pnpm run build && pnpm run deploy",
+    "build": "pnpm clean && pnpm compile",
+    "deploy": "pnpm hardhat node"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.1",
+    "hardhat": "^2.12.6",
+    "ts-node": "^10.9.1"
+  }
+}
