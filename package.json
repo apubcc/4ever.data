@@ -13,5 +13,8 @@
   "license": "ISC",
   "devDependencies": {
     "turbo": "^1.7.2"
+  },
+  "dependencies": {
+    "hardhat": "^2.12.6"
   }
 }
