@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 
 /**
  * The purpose of the Purchase Listener interface is to listen for purchases of datasets on the marketplace, Purchase Listener
- * is set to the data product beneficary
+ * is set to the data product beneficiary
  */
 interface IPurchaseListener {
 	/**
@@ -13,9 +13,9 @@ interface IPurchaseListener {
 	 * IMPORTANT: include onlyMarketplace modifier to your implementations if your logic depends on the arguments!
 	 */
 	function onPurchase(
-		bytes32 productId,
-		address subscriber,
-		uint256 endTimestamp,
+		bytes32 productId, 
+		address subscriber, 
+		uint256 endTimestamp, 
 		uint256 priceDatacoin,
 		uint256 feeDatacoin
 	) external returns (bool accepted);
