@@ -77,7 +77,7 @@ contract LimitWithdrawModule is
         delete blacklisted[newMember];
     }
 
-    function onPart(
+    function onLeave(
         address leavingMember,
         MemberLeaveCode leaveCode
     ) external override onlyDataDAO {
