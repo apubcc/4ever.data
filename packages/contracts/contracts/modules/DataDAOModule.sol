@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.9;
 
-import "../IERC677.sol";
+import "../interfaces/IERC677.sol";
 import "../MemberLeaveCode.sol";
 
 interface IDataDAO {

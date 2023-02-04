@@ -7,9 +7,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import "./IFeeOracle.sol";
+import "../interfaces/IFeeOracle.sol";
 
-contract DAOFeeOracle is Initializable, OwnableUpgradeable, UUPSUpgradeable, IFeeOracle {
+contract DAOFeeOracle is
+    Initializable,
+    OwnableUpgradeable,
+    UUPSUpgradeable,
+    IFeeOracle
+{
     uint public fee; //unsigned integer that stores the fee in wei
     address public override beneficiary; //address of the beneficiary
 
@@ -17,7 +22,10 @@ contract DAOFeeOracle is Initializable, OwnableUpgradeable, UUPSUpgradeable, IFe
     event FeeChanged(uint newFeeWei); //event that is emitted when the fee is changed
     event BeneficiaryChanged(address newDAOFeeBeneficiaryAddress); //event that is emitted when the beneficiary is changed
 
-    function initialize(uint feeWei, address DAOFeeBeneficiaryAddress) public initializer {
+    function initialize(
+        uint feeWei,
+        address DAOFeeBeneficiaryAddress
+    ) public initializer {
         __Ownable_init();
         __UUPSUpgradeable_init();
         setFee(feeWei);
@@ -34,7 +42,7 @@ contract DAOFeeOracle is Initializable, OwnableUpgradeable, UUPSUpgradeable, IFe
         emit BeneficiaryChanged(DAOFeeBeneficiaryAddress);
     }
 
-    function DAOFeeFor(address) override public view returns(uint feeWei) {
+    function DAOFeeFor(address) public view override returns (uint feeWei) {
         return fee;
     }
 

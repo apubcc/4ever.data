@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.9;
 
-import "../IERC677.sol";
+import "../interfaces/IERC677.sol";
 import "./DataDAOModule.sol";
-import "./IWithdrawModule.sol";
-import "./IJoinListener.sol";
-import "./ILeaveListener.sol";
+import "../interfaces/IWithdrawModule.sol";
+import "../interfaces/IJoinListener.sol";
+import "../interfaces/ILeaveListener.sol";
 
 /**
  * @title DataDAO module that limits the amount of tokens that can be withdrawn

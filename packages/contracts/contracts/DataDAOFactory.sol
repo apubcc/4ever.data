@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./DataDAOTemplate.sol";
-import "./Ownable.sol";
+import "./modules/Ownable.sol";
 
 contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     event DataDAOCreated(

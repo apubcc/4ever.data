@@ -4,14 +4,14 @@ pragma solidity ^0.8.9;
 
 // upgradeable proxy imports
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./Ownable.sol";
-import "./IFeeOracle.sol";
-import "./IERC677.sol";
-import "./IERC677Receiver.sol";
-import "./modules/IWithdrawModule.sol";
-import "./modules/IJoinListener.sol";
-import "./modules/ILeaveListener.sol";
-import "./IPurchaseListener.sol";
+import "./modules/Ownable.sol";
+import "./interfaces/IFeeOracle.sol";
+import "./interfaces/IERC677.sol";
+import "./interfaces/IERC677Receiver.sol";
+import "./interfaces/IWithdrawModule.sol";
+import "./interfaces/IJoinListener.sol";
+import "./interfaces/ILeaveListener.sol";
+import "./interfaces/IPurchaseListener.sol";
 import "./MemberLeaveCode.sol";
 
 contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {

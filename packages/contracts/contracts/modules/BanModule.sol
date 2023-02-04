@@ -3,7 +3,7 @@
 pragma solidity ^0.8.9;
 
 import "./DataDAOModule.sol";
-import "./IJoinListener.sol";
+import "../interfaces/IJoinListener.sol";
 
 /**
  * @title A DataDAO module that allows to ban members
