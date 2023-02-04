@@ -5,5 +5,5 @@ pragma solidity ^0.8.9;
 import "../MemberLeaveCode.sol";
 
 interface ILeaveListener {
-    function onPart(address leavingMember, MemberLeaveCode leaveCode) external;
+    function onLeave(address leavingMember, MemberLeaveCode leaveCode) external;
 }
