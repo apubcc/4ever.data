@@ -94,14 +94,14 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function deployNewDataDAO(
         address payable owner,
         uint256 adminFeeFraction,
-        address[] memory managers,
+        address manager,
         string calldata metadataJsonString
     ) public returns (address) {
         return
             deployNewDataDAOWithToken(
                 defaultToken,
                 owner,
-                managers,
+                manager,
                 adminFeeFraction,
                 metadataJsonString
             );
@@ -110,7 +110,7 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function deployNewDataDAOWithToken(
         address token,
         address payable owner,
-        address[] memory managers,
+        address manager,
         uint256 adminFeeFraction,
         string calldata metadataJsonString
     ) public returns (address) {
@@ -118,7 +118,7 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         DataDAOTemplate(DataDAO).initialize(
             owner,
             token,
-            managers,
+            manager,
             defaultNewMemberInitialEth,
             adminFeeFraction,
             DAOFeeOracle,
