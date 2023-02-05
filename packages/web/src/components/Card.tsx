@@ -9,7 +9,7 @@ export default function Card({ data }) {
           <Image src="/favicon.ico" alt="dataset thumbnail" fill className="object-contain" />
         </div>
         <div className="p-2">
-          <p className="font-bold text-xl">{ data.title }</p>
+          <p className="font-bold text-xl">{ data.name }</p>
           <p>{ data.desc }</p>
         </div>
       </div>
