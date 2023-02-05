@@ -15,7 +15,6 @@ export async function getServerSideProps() {
         r[a.verified].push(a);
         return r;
   }, Object.create(null));
-  console.log('fuck', datasets)
 
   return {
     props: { datasets }
