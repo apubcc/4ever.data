@@ -40,16 +40,14 @@ export default function Dataset({ data }) {
             <p>Size: { data.size }b</p>
             <p>IPFS hash: { data.ipfs_hash }</p>
             <p>Filecoin hash: { data.filecoin_hash }</p>
-            <div className="flex gap-4 items-center">
-              <p>{ data.file_name}</p>
-              <a 
-                href=""
-                className="inline-block px-4 py-3 font-medium text-white bg-black rounded-lg"
-                download
-              >
-                Download Dataset
-              </a>
-            </div>
+            <p>
+              Dataset file: <a target="_blank" href={`https://ipfs.io/ipfs/${data.ipfs_hash}`} className="text-blue-500 underline">{data.file_name}</a>
+            </p>
+            <button
+              className="px-4 py-3 font-medium text-white bg-black rounded-lg"
+            >
+              Verify Dataset
+            </button>
           </div>
         </>
       )}

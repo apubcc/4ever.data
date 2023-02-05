@@ -9,6 +9,7 @@ export default function Profile() {
         <>
           <div className="space-y-6">
             <h1 className="text-4xl font-bold">About</h1>
+            <a href="https://github.com/APU-Blockchain-Cryptocurrency-Club/fvm-space-warp/">GitHub</a>
           </div>
         </>
       )}
