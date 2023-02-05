@@ -31,8 +31,12 @@
     "typechain": "^8.1.0"
   },
   "dependencies": {
+    "@glif/filecoin-address": "^2.0.20",
     "@openzeppelin/contracts": "^4.8.1",
     "@openzeppelin/contracts-upgradeable": "^4.8.1",
-    "@zondax/filecoin-solidity": "^0.5.0-beta.1"
+    "@zondax/filecoin-solidity": "^0.5.0-beta.1",
+    "dotenv": "^16.0.3",
+    "hardhat-deploy": "^0.11.23",
+    "hardhat-deploy-ethers": "0.3.0-beta.13"
   }
 }
