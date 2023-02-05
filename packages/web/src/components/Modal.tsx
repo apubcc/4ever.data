@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import lighthouse from '@lighthouse-web3/sdk';
 import { useAccount } from 'wagmi';
 
 import supabase from '@/lib/supabase';
 
-export default function Modal({ isOpen, toggleModal }) {
+// TODO: add proper type annotations
+export default function Modal({ isOpen, toggleModal }: { isOpen: boolean, toggleModal: any }) {
   const [loading, setLoading] = useState(false);
   const { address } = useAccount();
 
-  const onSubmit = async (e) => {
+  const onSubmit = async (e: React.FormEventHandler<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     const { title, desc, file } = e.target
@@ -18,6 +19,7 @@ export default function Modal({ isOpen, toggleModal }) {
         files: file.files
       }
     }
+    // @ts-ignore
     const output = await lighthouse.upload(babi, process.env.NEXT_PUBLIC_LIGHTHOUSE_API_KEY)
     console.log(output)
     if (!output || !output.data) {
@@ -26,6 +28,7 @@ export default function Modal({ isOpen, toggleModal }) {
     }
     const { error } = await supabase
       .from('datasets').insert({
+        // @ts-ignore
         name: title.value,
         desc: desc.value,
         ipfs_hash: output.data.Hash,

@@ -1,7 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Card({ data }) {
+import { Dataset } from '@/lib/interfaces';
+
+export default function Card({ data }: { data: Dataset }) {
   return (
     <Link href={ data.verified ? `/datasets/${data.id}` : `/verify/${data.id}` }>
       <div className="border rounded-lg shadow-lg min-h-[16rem] hover:cursor-pointer">
