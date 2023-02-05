@@ -4,7 +4,7 @@ pragma solidity ^0.8.9;
 
 // upgradeable proxy imports
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./modules/Ownable.sol";
+import "./Ownable.sol";
 import "./interfaces/IFeeOracle.sol";
 import "./interfaces/IERC677.sol";
 import "./interfaces/IERC677Receiver.sol";
@@ -13,6 +13,10 @@ import "./interfaces/IJoinListener.sol";
 import "./interfaces/ILeaveListener.sol";
 import "./interfaces/IPurchaseListener.sol";
 import "./MemberLeaveCode.sol";
+import {MarketAPI} from "@zondax/filecoin-solidity/contracts/v0.8/MarketAPI.sol";
+import {CommonTypes} from "@zondax/filecoin-solidity/contracts/v0.8/types/CommonTypes.sol";
+import {MarketTypes} from "@zondax/filecoin-solidity/contracts/v0.8/types/MarketTypes.sol";
+import {BigInt} from "@zondax/filecoin-solidity/contracts/v0.8/cbor/BigIntCbor.sol";
 
 contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     //identifiers to identify member and membership manager status
@@ -111,6 +115,32 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     mapping(address => MemberInfo) public memberData;
     mapping(address => Status) public joinMembershipManagers;
     mapping(address => uint) public memberWeight;
+
+    // number of proposals currently in DAO
+    uint256 public proposalCount;
+    // mapping to check whether the cid is set for voting
+    mapping(bytes => bool) public cidSet;
+    // storing the size of the cid
+    mapping(bytes => uint) public cidSizes;
+
+    mapping(bytes => mapping(bytes => bool)) public cidProviders;
+
+    struct cidProposal {
+        uint256 proposalID;
+        address storageProvider;
+        bytes cidRaw;
+        uint size;
+        uint256 voteCount;
+        uint256 minimumVotes;
+        uint256 proposedAt;
+        uint256 proposalExpireAt;
+    }
+
+    //mapping to store the cid proposals
+    mapping(uint256 => cidProposal) public cidProposals;
+
+    // mapping array to track whether the user has voted for the proposal
+    mapping(address => mapping(uint256 => bool)) public hasVotedForProposal;
 
     constructor() Ownable(address(0)) {}
 
@@ -738,5 +768,73 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
     function lockModules() public onlyOwner {
         modulesLocked = true;
+    }
+
+    function createCIDProposal(bytes calldata cidRaw, uint size) public {
+        proposalCount++;
+        cidProposal memory proposal = cidProposal(
+            proposalCount,
+            msg.sender,
+            cidRaw,
+            size,
+            0,
+            5,
+            block.timestamp,
+            block.timestamp + 1 hours
+        );
+
+        cidProposals[proposalCount] = proposal;
+        cidSet[cidRaw] = true;
+        cidSizes[cidRaw] = size;
+    }
+
+    function voteCIDProposal(uint256 proposalID) public {
+        require(
+            !isCallerSP(proposalID),
+            "error_storageProviderCannotVoteHisOwnProposal"
+        );
+        require(
+            !hasVotedForProposal[msg.sender][proposalID],
+            "error_alreadyVoted"
+        );
+        require(isVotingOn(proposalID), "error_votingPeriodFinished");
+        cidProposals[proposalID].voteCount =
+            cidProposals[proposalID].voteCount +
+            1;
+        hasVotedForProposal[msg.sender][proposalID] = true;
+    }
+
+    function isPolicyOK(uint256 proposalID) public view returns (bool) {
+        require(
+            cidProposals[proposalID].proposalExpireAt > block.timestamp,
+            "error_votingPeriodGoingOn"
+        );
+        return
+            cidProposals[proposalID].voteCount >=
+            cidProposals[proposalID].minimumVotes;
+    }
+
+    function authorizeData(
+        uint256 proposalID,
+        bytes calldata cidRaw,
+        bytes calldata provider,
+        uint size
+    ) public {
+        require(cidSet[cidRaw], "error_cidNotSet");
+        require(cidSizes[cidRaw] == size, "error_sizeNotMatch");
+        require(isPolicyOK(proposalID), "error_policyNotOKCannotAuthorizeData");
+        cidProviders[cidRaw][provider] = true;
+    }
+
+    function getSP(uint256 proposalID) public view returns (address) {
+        return cidProposals[proposalID].storageProvider;
+    }
+
+    function isCallerSP(uint256 proposalID) public view returns (bool) {
+        return getSP(proposalID) == msg.sender;
+    }
+
+    function isVotingOn(uint256 proposalID) public view returns (bool) {
+        return cidProposals[proposalID].proposalExpireAt > block.timestamp;
     }
 }
