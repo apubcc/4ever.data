@@ -1,23 +1,85 @@
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
+
+import { getAddress } from "@ethersproject/address";
+
+import {
+  FourEverDataFactory,
+  FourEverDataFeeOracle,
+} from "../typechain-types/contracts";
+import { parseEther } from "@ethersproject/units";
+
+const DAOBeneficiaryAddress = getAddress(
+  "0x53e320DC72B233392C87076A71c1A830D565B423"
+);
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+  const FourEverDataTemplateFactory = await ethers.getContractFactory(
+    "FourEverDataTemplate"
+  );
+  const FourEverDataTemplate = await FourEverDataTemplateFactory.deploy();
+  await FourEverDataTemplate.deployed();
+  console.log(
+    "4Ever.Data template deployed at %s",
+    FourEverDataTemplate.address
+  );
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const FourEverDataFeeOracleFactory = await ethers.getContractFactory(
+    "FourEverDataFeeOracle"
+  );
+  const feeOracle = (await upgrades.deployProxy(
+    FourEverDataFeeOracleFactory,
+    [parseEther("0.01"), DAOBeneficiaryAddress],
+    { kind: "uups" }
+  )) as FourEverDataFeeOracle;
+  await feeOracle.deployed();
+  console.log(
+    "4Ever.Data fee oracle factory deployed at %s",
+    feeOracle.address
+  );
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  const signers = await ethers.getSigners();
 
-  await lock.deployed();
+  const wallets = [];
+  const num = 5;
+  for (let i = 0; i < num; i++) {
+    const wallet = ethers.Wallet.fromMnemonic(
+      process.env.MNEMONIC || "",
+      `m/44'/60'/0'/0/${i}`
+    );
+    wallets.push(wallet.connect(ethers.provider));
+  }
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  const FourEverDataUSDC = await ethers.getContractFactory("FourEverDataUSDC");
+  const usdc = await FourEverDataUSDC.deploy();
+
+  console.log(`Signers...`);
+  console.log("Owner: ", signers[0].address);
+  wallets.forEach((signer, index) => {
+    if (index > 5) {
+      return;
+    }
+    console.log(signer.address, signer._isSigner);
+  });
+  console.log("\n\n");
+
+  await usdc.deployed();
+
+  console.log(`4Ever.Data USDC Deployed:  ${usdc.address}`);
+
+  const FourEverDataFactory = await ethers.getContractFactory(
+    "FourEverDataFactory"
+  );
+  const factory = (await upgrades.deployProxy(
+    FourEverDataFactory,
+    [FourEverDataTemplate.address, usdc.address, feeOracle.address],
+    { kind: "uups" }
+  )) as FourEverDataFactory;
+  console.log("4Ever.Data factory deployed at %s", factory.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
