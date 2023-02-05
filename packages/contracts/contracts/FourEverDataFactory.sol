@@ -9,10 +9,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import "./DataDAOTemplate.sol";
+import "./FourEverDataTemplate.sol";
 import "./Ownable.sol";
 
-contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract FourEverDataFactory is
+    Initializable,
+    OwnableUpgradeable,
+    UUPSUpgradeable
+{
     event DataDAOCreated(
         address indexed DataDAO,
         address indexed owner,
@@ -27,14 +31,14 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     event DataDAOInitialETHSent(uint amountWei);
     event OwnerInitialEthSent(uint amountWei);
 
-    address public dataDAOTemplate;
+    address public FourEverDataTemplateAddress;
     address public defaultToken;
 
     //variables below are used to initialize new DataDAOs
     uint public newDataDAOInitialEth;
     uint public newDataDAOOwnerInitialEth;
     uint public defaultNewMemberInitialEth;
-    address public DAOFeeOracle;
+    address public FourEverDataFeeOracle;
     uint256 public numOfDataDao;
     address public immutable dataDaoFactoryOwner;
     address public pendingOwner;
@@ -62,11 +66,11 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         __UUPSUpgradeable_init();
         setTemplate(_dataDAOTemplate);
         defaultToken = _defaultToken;
-        DAOFeeOracle = _DAOFeeOracle;
+        FourEverDataFeeOracle = _DAOFeeOracle;
     }
 
     function setTemplate(address _dataDAOTemplate) public onlyOwner {
-        dataDAOTemplate = _dataDAOTemplate;
+        FourEverDataTemplateAddress = _dataDAOTemplate;
     }
 
     receive() external payable {}
@@ -87,7 +91,7 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function setDAOFeeOracle(address newFeeOracleAddress) public onlyOwner {
-        DAOFeeOracle = newFeeOracleAddress;
+        FourEverDataFeeOracle = newFeeOracleAddress;
         emit DAOFeeOracleUpdated(newFeeOracleAddress);
     }
 
@@ -114,14 +118,16 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         uint256 adminFeeFraction,
         string calldata metadataJsonString
     ) public returns (address) {
-        address payable DataDAO = payable(Clones.clone(dataDAOTemplate));
-        DataDAOTemplate(DataDAO).initialize(
+        address payable DataDAO = payable(
+            Clones.clone(FourEverDataTemplateAddress)
+        );
+        FourEverDataTemplate(DataDAO).initialize(
             owner,
             token,
             manager,
             defaultNewMemberInitialEth,
             adminFeeFraction,
-            DAOFeeOracle,
+            FourEverDataFeeOracle,
             metadataJsonString
         );
 
@@ -133,7 +139,7 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             )
         );
         searchByAddress[msg.sender] = address(DataDAO);
-        emit DataDAOCreated(DataDAO, owner, dataDAOTemplate);
+        emit DataDAOCreated(DataDAO, owner, FourEverDataTemplateAddress);
 
         if (
             newDataDAOInitialEth != 0 &&

@@ -18,7 +18,7 @@ import {CommonTypes} from "@zondax/filecoin-solidity/contracts/v0.8/types/Common
 import {MarketTypes} from "@zondax/filecoin-solidity/contracts/v0.8/types/MarketTypes.sol";
 import {BigInt} from "@zondax/filecoin-solidity/contracts/v0.8/cbor/BigIntCbor.sol";
 
-contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
+contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     //identifiers to identify member and membership manager status
     enum Status {
         NONE,
@@ -87,7 +87,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
     //constants
     IERC677 public token;
-    IFeeOracle public DAOFeeOracle;
+    IFeeOracle public FourEverDataFeeOracle;
 
     //modules
     IWithdrawModule public withdrawModule;
@@ -158,7 +158,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         string calldata initialMetadataJsonString
     ) public {
         require(!isInitialized(), "error_alreadyInitialized");
-        DAOFeeOracle = IFeeOracle(DAOFeeOracleAddress);
+        FourEverDataFeeOracle = IFeeOracle(DAOFeeOracleAddress);
         owner = msg.sender;
         token = IERC677(tokenAddress);
         addMembershipManager(initialMembershipManager);
@@ -180,7 +180,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         Stats storage daoStats = stats[daoAddress];
 
         uint256 cleanedInactiveMemberCount = daoStats.inactiveMemberCount;
-        address DAOBeneficiary = DAOFeeOracle.beneficiary();
+        address DAOBeneficiary = FourEverDataFeeOracle.beneficiary();
         if (memberData[owner].status == Status.INACTIVE) {
             cleanedInactiveMemberCount--;
         }
@@ -201,7 +201,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     }
 
     function setAdminFee(uint256 newAdminFee) public onlyOwner {
-        uint DAOFeeFraction = DAOFeeOracle.DAOFeeFor(address(this));
+        uint DAOFeeFraction = FourEverDataFeeOracle.DAOFeeFor(address(this));
         require(newAdminFee + DAOFeeFraction <= 1e18, "error_adminFeeTooHigh");
         uint oldAdminFee = adminFeeFraction;
         adminFeeFraction = newAdminFee;
@@ -233,8 +233,8 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
         // fractions are expressed as multiples of 10^18 just like tokens, so must divide away the extra 10^18 factor
         //   overflow in multiplication is not an issue: 256bits ~= 10^77
-        uint DAOFeeFraction = DAOFeeOracle.DAOFeeFor(address(this));
-        address DAOBeneficiary = DAOFeeOracle.beneficiary();
+        uint DAOFeeFraction = FourEverDataFeeOracle.DAOFeeFor(address(this));
+        address DAOBeneficiary = FourEverDataFeeOracle.beneficiary();
 
         // sanity check: adjust oversize admin fee (prevent over 100% fees)
         if (adminFeeFraction + DAOFeeFraction > 1 ether) {

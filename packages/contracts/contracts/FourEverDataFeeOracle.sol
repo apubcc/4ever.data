@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./interfaces/IFeeOracle.sol";
 
-contract DAOFeeOracle is
+contract FourEverDataFeeOracle is
     Initializable,
     OwnableUpgradeable,
     UUPSUpgradeable,
