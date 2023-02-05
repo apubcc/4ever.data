@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./DataDAOTemplate.sol";
-import "./modules/Ownable.sol";
+import "./Ownable.sol";
 
 contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     event DataDAOCreated(
@@ -35,8 +35,23 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     uint public newDataDAOOwnerInitialEth;
     uint public defaultNewMemberInitialEth;
     address public DAOFeeOracle;
-
+    uint256 public numOfDataDao;
+    address public immutable dataDaoFactoryOwner;
     address public pendingOwner;
+
+    struct dataDaoFactoryStruct {
+        address dataDaoOwner;
+        address dataDaoFactoryOwner;
+    }
+
+    mapping(address => dataDaoFactoryStruct) public allDataDaos;
+
+    // owner address will be used check which address own/create a new dataDAO
+    mapping(address => address) public searchByAddress;
+
+    constructor(address _dataDaoFactoryOwner) {
+        dataDaoFactoryOwner = _dataDaoFactoryOwner;
+    }
 
     function initialize(
         address _dataDAOTemplate,
@@ -110,6 +125,14 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
             metadataJsonString
         );
 
+        numOfDataDao++;
+        allDataDaos[msg.sender] = (
+            dataDaoFactoryStruct(
+                msg.sender, // address of dataDAO owner
+                address(this)
+            )
+        );
+        searchByAddress[msg.sender] = address(DataDAO);
         emit DataDAOCreated(DataDAO, owner, dataDAOTemplate);
 
         if (
@@ -146,4 +169,16 @@ contract DataDAOFactory is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     function renounceOwnership() public override onlyOwner {}
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
+
+    function getContractBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function getAddressOfContract() public view returns (address) {
+        return address(this);
+    }
+
+    function getAddressOfDataDaoFactoryOwner() public view returns (address) {
+        return dataDaoFactoryOwner;
+    }
 }
