@@ -101,17 +101,19 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     string public metadataJsonString;
 
     //stats
-    uint256 public totalRevenue;
-    uint256 public totalEarnings;
-    uint256 public totalAdminFees;
-    uint256 public totalDAOFees;
-    uint256 public totalWithdrawn;
-    uint256 public activeMemberCount;
-    uint256 public inactiveMemberCount;
-    uint256 public lifetimeMemberEarnings; // sum of earnings per totalWeight, scaled up by 1e18; NOT PER MEMBER anymore!
-    uint256 public joinMembershipManagerCount;
-    uint256 public totalWeight; // default will be 1e18, or "1 ether"
-
+    struct Stats {
+        uint256 totalRevenue;
+        uint256 totalEarnings;
+        uint256 totalAdminFees;
+        uint256 totalDAOFees;
+        uint256 totalWithdrawn;
+        uint256 activeMemberCount;
+        uint256 inactiveMemberCount;
+        uint256 lifetimeMemberEarnings; // sum of earnings per totalWeight, scaled up by 1e18; NOT PER MEMBER anymore!
+        uint256 joinMembershipManagerCount;
+        uint256 totalWeight; // default will be 1e18, or "1 ether"
+    }
+    mapping(address => Stats) public stats;
     mapping(address => MemberInfo) public memberData;
     mapping(address => Status) public joinMembershipManagers;
     mapping(address => uint) public memberWeight;
@@ -149,7 +151,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     function initialize(
         address initialOwner,
         address tokenAddress,
-        address[] memory initialMembershipManagers,
+        address initialMembershipManager,
         uint256 defaultNewMemberEth,
         uint256 initialAdminFeeFraction,
         address DAOFeeOracleAddress,
@@ -159,7 +161,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         DAOFeeOracle = IFeeOracle(DAOFeeOracleAddress);
         owner = msg.sender;
         token = IERC677(tokenAddress);
-        addMembershipManagers(initialMembershipManagers);
+        addMembershipManager(initialMembershipManager);
         setAdminFee(initialAdminFeeFraction);
         setNewMemberEth(defaultNewMemberEth);
         setMetadata(initialMetadataJsonString);
@@ -174,7 +176,10 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
      * Get all DataDAO state variables in a single call
      */
     function getStats() public view returns (uint256[9] memory) {
-        uint256 cleanedInactiveMemberCount = inactiveMemberCount;
+        address daoAddress = address(this);
+        Stats storage daoStats = stats[daoAddress];
+
+        uint256 cleanedInactiveMemberCount = daoStats.inactiveMemberCount;
         address DAOBeneficiary = DAOFeeOracle.beneficiary();
         if (memberData[owner].status == Status.INACTIVE) {
             cleanedInactiveMemberCount--;
@@ -183,15 +188,15 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
             cleanedInactiveMemberCount--;
         }
         return [
-            totalRevenue,
-            totalEarnings,
-            totalAdminFees,
-            totalDAOFees,
-            totalWithdrawn,
-            activeMemberCount,
+            daoStats.totalRevenue,
+            daoStats.totalEarnings,
+            daoStats.totalAdminFees,
+            daoStats.totalDAOFees,
+            daoStats.totalWithdrawn,
+            daoStats.activeMemberCount,
             cleanedInactiveMemberCount,
-            lifetimeMemberEarnings,
-            joinMembershipManagerCount
+            daoStats.lifetimeMemberEarnings,
+            daoStats.joinMembershipManagerCount
         ];
     }
 
@@ -215,12 +220,15 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     }
 
     function refreshRevenue() public returns (uint256) {
+        address daoAddress = address(this);
         uint256 balance = token.balanceOf(address(this));
         uint256 newTokens = balance - totalWithdrawable();
-        if (newTokens == 0 || activeMemberCount == 0) {
+        Stats storage daoStats = stats[daoAddress];
+
+        if (newTokens == 0 || daoStats.activeMemberCount == 0) {
             return 0;
         }
-        totalRevenue += newTokens;
+        daoStats.totalRevenue += newTokens;
         emit RevenueReceived(newTokens);
 
         // fractions are expressed as multiples of 10^18 just like tokens, so must divide away the extra 10^18 factor
@@ -239,21 +247,24 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
         _increaseBalance(owner, adminFeeWei);
         _increaseBalance(DAOBeneficiary, DAOFeeWei);
-        totalAdminFees += adminFeeWei;
-        totalDAOFees += DAOFeeWei;
+        daoStats.totalAdminFees += adminFeeWei;
+        daoStats.totalDAOFees += DAOFeeWei;
         emit FeesCharged(adminFeeWei, DAOFeeWei);
 
         // newEarnings and totalWeight are ether-scale (10^18), so need to scale earnings to "per unit weight" to avoid division going below 1
         uint earningsPerUnitWeightScaled = (newEarnings * 1 ether) /
-            totalWeight;
-        lifetimeMemberEarnings += earningsPerUnitWeightScaled; // this variable was repurposed to total "per unit weight" earnings during DU's existence
-        totalEarnings += newEarnings;
+            daoStats.totalWeight;
+        daoStats.lifetimeMemberEarnings += earningsPerUnitWeightScaled; // this variable was repurposed to total "per unit weight" earnings during DU's existence
+        daoStats.totalEarnings += newEarnings;
 
-        emit NewEarnings(newTokens / activeMemberCount, activeMemberCount);
+        emit NewEarnings(
+            newTokens / daoStats.activeMemberCount,
+            daoStats.activeMemberCount
+        );
         emit NewWeightedEarnings(
             earningsPerUnitWeightScaled,
-            totalWeight,
-            activeMemberCount
+            daoStats.totalWeight,
+            daoStats.activeMemberCount
         );
 
         assert(token.balanceOf(address(this)) == totalWithdrawable()); // calling this function immediately again should just return 0 and do nothing
@@ -266,6 +277,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         bytes calldata data
     ) external override {
         require(msg.sender == address(token), "error_onlyTokenContract");
+        Stats storage daoStats = stats[msg.sender];
 
         if (data.length == 20) {
             address recipient;
@@ -274,7 +286,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
                 recipient := shr(96, calldataload(data.offset)) //shr is a bitwise right shift operator. It shifts the first operand the number of bits specified by the second operand to the right, and fills the low bits with copies of the high bit of the first operand.
             }
             _increaseBalance(recipient, amount);
-            totalRevenue += amount;
+            daoStats.totalRevenue += amount;
             emit TansferToAddressInContract(msg.sender, recipient, amount);
         } else if (data.length == 32) {
             //address was encoded by converting to bytes32 and then to bytes
@@ -284,7 +296,7 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
                 recipient := calldataload(data.offset) //shr is a bitwise right shift operator. It shifts the first operand the number of bits specified by the second operand to the right, and fills the low bits with copies of the high bit of the first operand.
             }
             _increaseBalance(recipient, amount);
-            totalRevenue += amount;
+            daoStats.totalRevenue += amount;
             emit TansferToAddressInContract(msg.sender, recipient, amount);
         }
 
@@ -303,12 +315,14 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     }
 
     function getEarnings(address member) public view returns (uint256) {
+        address daoAddress = address(this);
         MemberInfo storage info = memberData[member];
+        Stats storage daoStats = stats[daoAddress];
         require(info.status != Status.NONE, "error_notMember");
         if (info.status == Status.ACTIVE) {
             //removing the 1 ether scaling factor
-            uint newEarnings = ((lifetimeMemberEarnings - info.lmeAtJoin) *
-                memberWeight[member]) / (1 ether);
+            uint newEarnings = ((daoStats.lifetimeMemberEarnings -
+                info.lmeAtJoin) * memberWeight[member]) / (1 ether);
             return info.earningsBeforeLastJoin + newEarnings;
         }
         return info.earningsBeforeLastJoin;
@@ -337,7 +351,8 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     }
 
     function totalWithdrawable() public view returns (uint256) {
-        return totalRevenue - totalWithdrawn;
+        Stats storage daoStats = stats[msg.sender];
+        return daoStats.totalRevenue - daoStats.totalWithdrawn;
     }
 
     function isMember(address member) public view returns (bool) {
@@ -353,20 +368,15 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         _;
     }
 
-    function addMembershipManagers(address[] memory managers) public onlyOwner {
-        for (uint256 i = 0; i < managers.length; i++) {
-            addMembershipManager(managers[i]);
-        }
-    }
-
     function addMembershipManager(address manager) public onlyOwner {
         require(
             joinMembershipManagers[manager] != Status.ACTIVE,
             "error_alreadyActiveMembershipManager"
         );
+        Stats storage daoStats = stats[msg.sender];
         joinMembershipManagers[manager] = Status.ACTIVE;
         emit MembershipManagerAdded(manager);
-        joinMembershipManagerCount++;
+        daoStats.joinMembershipManagerCount++;
     }
 
     function removeMembershipManager(address manager) public onlyOwner {
@@ -374,32 +384,27 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
             joinMembershipManagers[manager] == Status.ACTIVE,
             "error_notActiveMembershipManager"
         );
+        Stats storage daoStats = stats[msg.sender];
         joinMembershipManagers[manager] = Status.INACTIVE;
         emit MembershipManagerRemoved(manager);
-        joinMembershipManagerCount--;
+        daoStats.joinMembershipManagerCount--;
     }
 
     function addMember(address payable newMember) public onlyMembershipManager {
-        addMemberWithWeight(newMember, 1 ether);
-    }
-
-    function addMemberWithWeight(
-        address payable newMember,
-        uint initialWeight
-    ) public onlyMembershipManager {
+        address daoAddress = address(this);
         MemberInfo storage info = memberData[newMember];
+        Stats storage daoStats = stats[daoAddress];
         require(!isMember(newMember), "error_alreadyMember");
-        require(initialWeight > 0, "error_zeroWeight");
         if (info.status == Status.INACTIVE) {
-            inactiveMemberCount--;
+            daoStats.inactiveMemberCount--;
         }
         bool sendEth = info.status == Status.NONE &&
             newMemberEth > 0 &&
             address(this).balance >= newMemberEth;
         info.status = Status.ACTIVE;
-        activeMemberCount++;
+        daoStats.activeMemberCount++;
         emit MemberJoined(newMember);
-        _setMemberWeight(newMember, initialWeight);
+        _setMemberWeight(newMember, 1 ether);
 
         for (uint i = 0; i < joinListeners.length; i++) {
             address listener = joinListeners[i];
@@ -421,11 +426,11 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
             "error_notPermitted"
         );
         require(isMember(member), "error_notActiveMember");
-
+        Stats storage daoStats = stats[msg.sender];
         _setMemberWeight(member, 0);
         memberData[member].status = Status.INACTIVE;
-        activeMemberCount--;
-        inactiveMemberCount++;
+        daoStats.activeMemberCount--;
+        daoStats.inactiveMemberCount++;
         emit MemberLeft(member, leaveCode);
 
         for (uint i = 0; i < leaveListeners.length; i++) {
@@ -442,28 +447,6 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         );
     }
 
-    function addMembers(address payable[] calldata members) external {
-        for (uint256 i = 0; i < members.length; i++) {
-            addMember(members[i]);
-        }
-    }
-
-    function partMembers(address[] calldata members) external {
-        for (uint256 i = 0; i < members.length; i++) {
-            partMember(members[i]);
-        }
-    }
-
-    function addMembersWithWeights(
-        address payable[] calldata members,
-        uint[] calldata weights
-    ) external onlyMembershipManager {
-        require(members.length == weights.length, "error_lengthMismatch");
-        for (uint256 i = 0; i < members.length; i++) {
-            addMemberWithWeight(members[i], weights[i]);
-        }
-    }
-
     function setMemberWeight(
         address member,
         uint newWeight
@@ -475,38 +458,22 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     }
 
     function _setMemberWeight(address member, uint newWeight) internal {
+        address daoAddress = address(this);
         MemberInfo storage info = memberData[member];
+        Stats storage daoStats = stats[daoAddress];
         info.earningsBeforeLastJoin = getEarnings(member);
-        info.lmeAtJoin = lifetimeMemberEarnings;
+        info.lmeAtJoin = daoStats.lifetimeMemberEarnings;
 
         uint oldWeight = memberWeight[member];
         memberWeight[member] = newWeight;
-        totalWeight = (totalWeight + newWeight) - oldWeight;
+        daoStats.totalWeight = (daoStats.totalWeight + newWeight) - oldWeight;
         emit MemberWeightChanged(member, oldWeight, newWeight);
-    }
-
-    function setMemberWeights(
-        address[] calldata members,
-        uint[] calldata newWeights
-    ) external onlyMembershipManager {
-        require(members.length == newWeights.length, "error_lengthMismatch");
-        for (uint i = 0; i < members.length; i++) {
-            address member = members[i];
-            uint weight = newWeights[i];
-            bool alreadyMember = isMember(member);
-            if (alreadyMember && weight == 0) {
-                partMember(member);
-            } else if (!alreadyMember && weight > 0) {
-                addMemberWithWeight(payable(member), weight);
-            } else if (alreadyMember && weight > 0) {
-                setMemberWeight(members[i], weight);
-            }
-        }
     }
 
     function transferToMemberInContract(address recipient, uint amount) public {
         _increaseBalance(recipient, amount);
-        totalRevenue += amount;
+        Stats storage daoStats = stats[msg.sender];
+        daoStats.totalRevenue += amount;
         emit TansferToAddressInContract(msg.sender, recipient, amount);
 
         uint balancebefore = token.balanceOf(address(this));
@@ -532,13 +499,15 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     }
 
     function _increaseBalance(address member, uint amount) internal {
+        address daoAddress = address(this);
         MemberInfo storage info = memberData[member];
+        Stats storage daoStats = stats[daoAddress];
         info.earningsBeforeLastJoin = info.earningsBeforeLastJoin + amount;
 
         // allow seeing and withdrawing earnings
         if (info.status == Status.NONE) {
             info.status = Status.INACTIVE;
-            inactiveMemberCount += 1;
+            daoStats.inactiveMemberCount += 1;
         }
     }
 
@@ -666,9 +635,11 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
             amount <= getWithdrawableEarnings(from),
             "error_insufficientBalance"
         );
+        address daoAddress = address(this);
         MemberInfo storage info = memberData[from];
+        Stats storage daoStats = stats[daoAddress];
         info.withdrawnEarnings += amount;
-        totalWithdrawn += amount;
+        daoStats.totalWithdrawn += amount;
 
         if (address(withdrawModule) != address(0)) {
             require(
@@ -814,17 +785,49 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
             cidProposals[proposalID].minimumVotes;
     }
 
-    function authorizeData(
-        uint256 proposalID,
-        bytes calldata cidRaw,
-        bytes calldata provider,
-        uint size
-    ) public {
-        require(cidSet[cidRaw], "error_cidNotSet");
-        require(cidSizes[cidRaw] == size, "error_sizeNotMatch");
-        require(isPolicyOK(proposalID), "error_policyNotOKCannotAuthorizeData");
-        cidProviders[cidRaw][provider] = true;
-    }
+    // function publishStorageDeals(
+    //     uint256 proposalID,
+    //     uint64 size,
+    //     bytes calldata client,
+    //     bytes calldata provider,
+    //     bytes calldata storage_price_per_epoch,
+    //     bytes calldata client_signature
+    // ) public returns (MarketTypes.PublishStorageDealsReturn memory) {
+    //     bytes memory cidRaw = "000";
+    //     require(cidSet[cidRaw], "error_cidNotSet");
+    //     require(cidSizes[cidRaw] == size, "error_sizeNotMatch");
+    //     require(isPolicyOK(proposalID), "error_policyNotOKCannotAuthorizeData");
+    //     //set default client collateral to 0
+    //     bytes memory defaultClientCollateral = "0";
+    //     //set default provider collateral to 0
+    //     bytes memory defaultProviderCollateral = "0.1";
+    //     //set default label to "4ever.data - datasets"
+    //     string memory defaultLabel = "4ever.data - datasets";
+    //     int64 start_epoch = 0;
+    //     int64 end_epoch = 0;
+
+    //     CommonTypes.ClientDealProposal[]
+    //         memory deals = new CommonTypes.ClientDealProposal[](1);
+    //     deals[0] = CommonTypes.ClientDealProposal({
+    //         proposal: CommonTypes.DealProposal({
+    //             piece_cid: cidRaw,
+    //             piece_size: size,
+    //             verified_deal: true,
+    //             client: client,
+    //             provider: provider,
+    //             label: defaultLabel,
+    //             start_epoch: start_epoch,
+    //             end_epoch: end_epoch,
+    //             storage_price_per_epoch: BigInt(storage_price_per_epoch, false),
+    //             provider_collateral: BigInt(defaultProviderCollateral, false),
+    //             client_collateral: BigInt(defaultClientCollateral, false)
+    //         }),
+    //         client_signature: client_signature
+    //     });
+    //     MarketTypes.PublishStorageDealsParams memory params = MarketTypes
+    //         .PublishStorageDealsParams(deals);
+    //     return MarketAPI.publishStorageDeals(params);
+    // }
 
     function getSP(uint256 proposalID) public view returns (address) {
         return cidProposals[proposalID].storageProvider;
@@ -836,5 +839,71 @@ contract DataDAOTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
     function isVotingOn(uint256 proposalID) public view returns (bool) {
         return cidProposals[proposalID].proposalExpireAt > block.timestamp;
+    }
+
+    function getBalances(
+        bytes memory addr
+    ) public returns (MarketTypes.GetBalanceReturn memory) {
+        return MarketAPI.getBalance(addr);
+    }
+
+    function getDealDataCommitment(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealDataCommitmentReturn memory) {
+        return MarketAPI.getDealDataCommitment(dealID);
+    }
+
+    function getDealClient(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealClientReturn memory) {
+        return MarketAPI.getDealClient(dealID);
+    }
+
+    function getDealProvider(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealProviderReturn memory) {
+        return MarketAPI.getDealProvider(dealID);
+    }
+
+    function getDealLabel(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealLabelReturn memory) {
+        return MarketAPI.getDealLabel(dealID);
+    }
+
+    function getDealTerm(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealTermReturn memory) {
+        return MarketAPI.getDealTerm(dealID);
+    }
+
+    function getDealTotalPrice(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealEpochPriceReturn memory) {
+        return MarketAPI.getDealTotalPrice(dealID);
+    }
+
+    function getDealClientCollateral(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealClientCollateralReturn memory) {
+        return MarketAPI.getDealClientCollateral(dealID);
+    }
+
+    function getDealProviderCollateral(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealProviderCollateralReturn memory) {
+        return MarketAPI.getDealProviderCollateral(dealID);
+    }
+
+    function getDealVerified(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealVerifiedReturn memory) {
+        return MarketAPI.getDealVerified(dealID);
+    }
+
+    function getDealActivation(
+        uint64 dealID
+    ) public returns (MarketTypes.GetDealActivationReturn memory) {
+        return MarketAPI.getDealActivation(dealID);
     }
 }
