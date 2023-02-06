@@ -8,6 +8,12 @@ import {
 } from "../typechain-types/contracts";
 import { parseEther } from "@ethersproject/units";
 
+require("hardhat-deploy-ethers");
+require("hardhat-deploy");
+
+import * as dotenv from "dotenv";
+dotenv.config();
+
 const DAOBeneficiaryAddress = getAddress(
   "0x53e320DC72B233392C87076A71c1A830D565B423"
 );
