@@ -673,6 +673,12 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
         hasVotedForProposal[msg.sender][proposalID] = true;
     }
 
+    function getProposal(
+        uint256 proposalID
+    ) public view returns (cidProposal memory) {
+        return cidProposals[proposalID];
+    }
+
     function isPolicyOK(uint256 proposalID) public view returns (bool) {
         require(
             cidProposals[proposalID].proposalExpireAt > block.timestamp,
@@ -747,4 +753,62 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
         storeDealVerificaton(dealId);
         storeDealActivationStatus(dealId);
     }
+
+    //function to get all the details of the deal
+    // function getDealDetails(
+    //     uint64 dealId
+    // )
+    //     public
+    //     view
+    //     returns (
+    //         string memory,
+    //         address,
+    //         address,
+    //         bytes32,
+    //         uint64,
+    //         uint64,
+    //         uint64,
+    //         uint64,
+    //         bool,
+    //         uint64
+    //     )
+    // {
+    //     return (
+    // string public dealLabel;
+    // uint64 public dealClientActorId;
+    // uint64 public dealProviderActorId;
+    // bool public isDealActivated;
+    // MarketTypes.GetDealDataCommitmentReturn public dealCommitment;
+    // MarketTypes.GetDealTermReturn public dealTerm;
+    // MarketTypes.GetDealEpochPriceReturn public dealPricePerEpoch;
+    // MarketTypes.GetDealClientCollateralReturn public clientCollateral;
+    // MarketTypes.GetDealProviderCollateralReturn public providerCollateral;
+    // MarketTypes.GetDealActivationReturn public activationStatus;
+    //     );
+    // }
+
+    //     function getStats() public view returns (uint256[9] memory) {
+    //     address daoAddress = address(this);
+    //     Stats storage daoStats = stats[daoAddress];
+
+    //     uint256 cleanedInactiveMemberCount = daoStats.inactiveMemberCount;
+    //     address DAOBeneficiary = FourEverDataFeeOracle.beneficiary();
+    //     if (memberData[owner].status == Status.INACTIVE) {
+    //         cleanedInactiveMemberCount--;
+    //     }
+    //     if (memberData[DAOBeneficiary].status == Status.INACTIVE) {
+    //         cleanedInactiveMemberCount--;
+    //     }
+    //     return [
+    //         daoStats.totalRevenue,
+    //         daoStats.totalEarnings,
+    //         daoStats.totalAdminFees,
+    //         daoStats.totalDAOFees,
+    //         daoStats.totalWithdrawn,
+    //         daoStats.activeMemberCount,
+    //         cleanedInactiveMemberCount,
+    //         daoStats.lifetimeMemberEarnings,
+    //         daoStats.joinMembershipManagerCount
+    //     ];
+    // }
 }
