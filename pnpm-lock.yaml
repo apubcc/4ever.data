@@ -64,6 +64,7 @@ importers:
   packages/web:
     specifiers:
       '@lighthouse-web3/sdk': ^0.1.12
+      '@pushprotocol/restapi': 0.2.1
       '@pushprotocol/uiweb': 0.2.3
       '@rainbow-me/rainbowkit': ^0.8.1
       '@supabase/supabase-js': ^2.7.1
@@ -79,12 +80,14 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0
       react-lottie: ^1.2.3
+      styled-components: ^5.3.6
       tailwindcss: ^3.2.4
       typescript: 4.9.4
       wagmi: ^0.10.15
     dependencies:
       '@lighthouse-web3/sdk': 0.1.12
-      '@pushprotocol/uiweb': 0.2.3_kf4qffaz7yb6hamybk4aw3oi3e
+      '@pushprotocol/restapi': 0.2.1_ethers@5.7.2
+      '@pushprotocol/uiweb': 0.2.3_nwqhn4t3c57f3kqy6bfwmoprei
       '@rainbow-me/rainbowkit': 0.8.1_onctrahywfky6u2s47au5ki2zy
       '@supabase/supabase-js': 2.7.1
       '@types/node': 18.11.18
@@ -97,6 +100,7 @@ importers:
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       react-lottie: 1.2.3_react@18.2.0
+      styled-components: 5.3.6_vtcxgy2wlmese7djxl6h7ok674
       typescript: 4.9.4
       wagmi: 0.10.15_nggnosjziztgyuxddmpq5zme2u
     devDependencies:
@@ -1804,8 +1808,8 @@ packages:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
     dev: false
 
-  /@pushprotocol/restapi/0.2.2_ethers@5.7.2:
-    resolution: {integrity: sha512-+LFAoq9PP3CmT8jPiVSIAD4JOHl4BWmh0i+QuTFtrUOF0T2rgBas0U39W/nLpwaOxHiMhjh7bKK9ETiedWnFjw==}
+  /@pushprotocol/restapi/0.2.1_ethers@5.7.2:
+    resolution: {integrity: sha512-NuyyBvp0RD18D0MJVebGiYZbEA6Cy65l6nrt1fe+dnlTDdzBRpao7bsConyL2Ch/jyXw95HB33T7cU5Du7J3+A==}
     peerDependencies:
       ethers: ^5.6.8
     dependencies:
@@ -1820,7 +1824,7 @@ packages:
       - debug
     dev: false
 
-  /@pushprotocol/uiweb/0.2.3_kf4qffaz7yb6hamybk4aw3oi3e:
+  /@pushprotocol/uiweb/0.2.3_nwqhn4t3c57f3kqy6bfwmoprei:
     resolution: {integrity: sha512-+V6k8l2wOerjbUBeNiyZKmGu3o1ES4ykIGuUe334osUBtQ0aEmlLxcjLceUkJXiT7cZKgFfMaBNFvrJ/ZQ85eA==}
     peerDependencies:
       '@pushprotocol/restapi': ^0.2.1
@@ -1828,13 +1832,13 @@ packages:
       react: '>=16.8.0'
       styled-components: 5.3.5
     dependencies:
-      '@pushprotocol/restapi': 0.2.2_ethers@5.7.2
+      '@pushprotocol/restapi': 0.2.1_ethers@5.7.2
       date-fns: 2.29.3
       emoji-picker-react: 3.6.5
       ethers: 5.7.2
       html-react-parser: 1.4.14_react@18.2.0
       react: 18.2.0
-      styled-components: 5.3.5_vtcxgy2wlmese7djxl6h7ok674
+      styled-components: 5.3.6_vtcxgy2wlmese7djxl6h7ok674
     dev: false
 
   /@rainbow-me/rainbowkit/0.8.1_onctrahywfky6u2s47au5ki2zy:
@@ -3721,7 +3725,7 @@ packages:
       - supports-color
     dev: false
 
-  /babel-plugin-styled-components/2.0.7_styled-components@5.3.5:
+  /babel-plugin-styled-components/2.0.7_styled-components@5.3.6:
     resolution: {integrity: sha512-i7YhvPgVqRKfoQ66toiZ06jPNA3p6ierpfUuEWxNF+fV27Uv5gxBkf8KZLHUCc1nFA9j6+80pYoIpqCeyW3/bA==}
     peerDependencies:
       styled-components: '>= 2'
@@ -3731,7 +3735,7 @@ packages:
       babel-plugin-syntax-jsx: 6.18.0
       lodash: 4.17.21
       picomatch: 2.3.1
-      styled-components: 5.3.5_vtcxgy2wlmese7djxl6h7ok674
+      styled-components: 5.3.6_vtcxgy2wlmese7djxl6h7ok674
     dev: false
 
   /babel-plugin-syntax-jsx/6.18.0:
@@ -10204,8 +10208,8 @@ packages:
       inline-style-parser: 0.1.1
     dev: false
 
-  /styled-components/5.3.5_vtcxgy2wlmese7djxl6h7ok674:
-    resolution: {integrity: sha512-ndETJ9RKaaL6q41B69WudeqLzOpY1A/ET/glXkNZ2T7dPjPqpPCXXQjDFYZWwNnE5co0wX+gTCqx9mfxTmSIPg==}
+  /styled-components/5.3.6_vtcxgy2wlmese7djxl6h7ok674:
+    resolution: {integrity: sha512-hGTZquGAaTqhGWldX7hhfzjnIYBZ0IXQXkCYdvF1Sq3DsUaLx6+NTHC5Jj1ooM2F68sBiVz3lvhfwQs/S3l6qg==}
     engines: {node: '>=10'}
     requiresBuild: true
     peerDependencies:
@@ -10218,7 +10222,7 @@ packages:
       '@emotion/is-prop-valid': 1.2.0
       '@emotion/stylis': 0.8.5
       '@emotion/unitless': 0.7.5
-      babel-plugin-styled-components: 2.0.7_styled-components@5.3.5
+      babel-plugin-styled-components: 2.0.7_styled-components@5.3.6
       css-to-react-native: 3.1.0
       hoist-non-react-statics: 3.3.2
       react: 18.2.0
