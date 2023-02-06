@@ -7,6 +7,7 @@ import { Dataset } from '@/lib/interfaces';
 import supabase from '@/lib/supabase';
 import Card from '@/components/Card';
 import Modal from '@/components/Modal';
+import Landing from '@/components/Landing';
 
 // export async function getServerSideProps() {
 //   const { error, data } = await supabase.from('datasets').select();
@@ -47,37 +48,75 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="max-w-5xl m-auto px-4 lg:px-0 py-8">
-      {isConnected && (
+    <div className="max-w-6xl m-auto px-4 lg:px-0 py-8 pb-24">
+      {isConnected 
+        ? (
         <>
           { datasets && <>
-            <div className="space-y-6">
+            <div className="space-y-12">
               <div className="flex justify-between items-center">
-                <h1 className="text-4xl font-bold">Datasets</h1>
+                <h1 className="text-5xl font-bold">Datasets</h1>
                 <button 
                   onClick={toggleModal}
-                  className="px-4 py-3 font-medium text-white bg-black rounded-lg"
+                  className="px-6 py-4 font-bold text-bg text-xl bg-primary"
                 >
                   Upload Dataset
                 </button>
               </div>
               { datasets.false && (
-                <div>
-                  <h2 className="text-3xl font-bold mb-3">Datasets Needing Verification</h2>
+                <div className="border-t-4 border-secondary py-4 px-6">
+                  <h2 className="text-3xl font-bold bg-secondary inline-block text-bg leading-relaxed relative -top-10">&nbsp;Datasets Needing Verification&nbsp;</h2>
                   <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     { datasets.false.map((data) => (
-                      <Card key={data.id} data={data}/>
+                      <Card key={data.id} data={data} color="secondary" />
                     ))}
+                    { datasets.false.map((data) => (
+                      <Card key={data.id} data={data} color="secondary" />
+                    ))}
+                    { datasets.false.map((data) => (
+                      <Card key={data.id} data={data} color="secondary" />
+                    ))}
+                    <p className="text-2xl text-white font-bold flex items-end gap-4">See all
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+                      </svg>
+                    </p>
                   </div>
                 </div>
               )}
               { datasets.true && (
-                <div>
-                  <h2 className="text-3xl font-bold mb-3">Verified Datasets</h2>
+                <div className="border-t-4 border-tertiary py-4 px-6">
+                  <h2 className="text-3xl font-bold bg-tertiary inline-block text-bg leading-relaxed relative -top-10">&nbsp;Verified Datasets&nbsp;</h2>
                   <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     { datasets.true.map((data) => (
-                      <Card key={data.id} data={data}/>
+                      <Card key={data.id} data={data} color="tertiary" />
                     ))}
+                    { datasets.true.map((data) => (
+                      <Card key={data.id} data={data} color="tertiary" />
+                    ))}
+                    { datasets.true.map((data) => (
+                      <Card key={data.id} data={data} color="tertiary" />
+                    ))}
+                    { datasets.true.map((data) => (
+                      <Card key={data.id} data={data} color="tertiary" />
+                    ))}
+                    { datasets.true.map((data) => (
+                      <Card key={data.id} data={data} color="tertiary" />
+                    ))}
+                    { datasets.true.map((data) => (
+                      <Card key={data.id} data={data} color="tertiary" />
+                    ))}
+                    { datasets.true.map((data) => (
+                      <Card key={data.id} data={data} color="tertiary" />
+                    ))}
+                    { datasets.true.map((data) => (
+                      <Card key={data.id} data={data} color="tertiary" />
+                    ))}
+                    <p className="text-2xl text-white font-bold flex items-end gap-4">See all
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+                      </svg>
+                    </p>
                   </div>
                 </div>
               )}
@@ -91,7 +130,8 @@ export default function Home() {
             />
           </>}
         </>
-      )}
+      )
+      : <Landing />}
     </div>
   )
 }

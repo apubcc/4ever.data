@@ -1,17 +1,14 @@
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { Dataset } from '@/lib/interfaces';
 
-export default function Card({ data }: { data: Dataset }) {
+export default function Card({ data, color }: { data: Dataset, color: string }) {
   return (
     <Link href={ data.verified ? `/datasets/${data.id}` : `/verify/${data.id}` }>
-      <div className="border rounded-lg shadow-lg min-h-[16rem] hover:cursor-pointer">
-        <div className="relative w-full min-h-[12rem] border-b">
-          <Image src="/favicon.ico" alt="dataset thumbnail" fill className="object-contain" />
-        </div>
+      <div className="border-b-4 border-white h-full hover:cursor-pointer pr-4 pb-4 hover:bg-white hover:text-bg duration-100">
         <div className="p-2">
-          <p className="font-bold text-xl">{ data.name }</p>
+          <p>#{ data.id }</p>
+          <p className="font-bold text-3xl">{ data.name }</p>
           <p>{ data.desc }</p>
         </div>
       </div>

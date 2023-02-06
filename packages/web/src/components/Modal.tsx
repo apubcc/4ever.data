@@ -46,17 +46,17 @@ export default function Modal({ isOpen, toggleModal }: { isOpen: boolean, toggle
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center">
-          <form onSubmit={onSubmit} className="min-w-[42rem] bg-white p-6 border rounded-lg shadow-lg transition space-y-6">
-            <p className="text-2xl font-bold">Upload your dataset</p>
+          <form onSubmit={onSubmit} className="min-w-[42rem] bg-bg p-6 border-4 duration-100 space-y-6">
+            <p className="text-3xl font-bold">Upload your dataset</p>
 
             <div className="space-y-3">
               <div className="flex flex-col">
                 <label htmlFor="title">Dataset Title</label>
-                <input required id="title" className="px-2 py-1 border rounded-md"/>
+                <input required id="title" className="p-2 bg-bg border-2 border-white focus:outline-none"/>
               </div>
               <div className="flex flex-col">
                 <label htmlFor="desc">Short description of your dataset</label>
-                <input id="desc" className="px-2 py-1 border rounded-md"/>
+                <input id="desc" className="p-2 bg-bg border-2 border-white focus:outline-none"/>
               </div>
               <div className="flex flex-col">
                 <label htmlFor="file">Upload file</label>
@@ -66,8 +66,8 @@ export default function Modal({ isOpen, toggleModal }: { isOpen: boolean, toggle
                   type="file" 
                   id="file" 
                   accept=".csv,.tsv,.xls,.xlsx,.txt"
-                  className="border rounded-md file:mr-5 file:py-2 file:px-6 file:rounded-md 
-                    file:border-0 file:bg-black file:text-white
+                  className="border file:mr-5 file:py-3 file:px-6 border-2 border-white
+                    file:border-0 file:bg-secondary file:text-bg
                     file:font-bold file:hover:cursor-pointer" 
                 />
                 <p className="text-sm">.csv, .tsv, or .xls/.xlsx files only (max size: 32GB)</p>
@@ -77,13 +77,13 @@ export default function Modal({ isOpen, toggleModal }: { isOpen: boolean, toggle
             <div className="flex justify-end gap-4">
               <button 
                 onClick={toggleModal}
-                className="px-4 py-3 min-w-[6rem] rounded-lg border-2 border-black font-medium"
+                className="px-6 py-4 min-w-[6rem] font-bold text-xl"
               >
                 Cancel
               </button>
               <button 
                 type="submit"
-                className="px-4 py-3 min-w-[6rem] rounded-lg font-medium bg-black text-white flex justify-center items-center"
+                className="px-6 py-4 font-bold text-bg text-xl bg-primary"
               >
                 { !loading
                   ? 'Upload'

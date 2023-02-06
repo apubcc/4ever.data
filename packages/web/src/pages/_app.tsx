@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { AppProps } from 'next/app'
-import { RainbowKitProvider, getDefaultWallets, lightTheme } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider, getDefaultWallets, darkTheme } from '@rainbow-me/rainbowkit';
 import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
@@ -39,9 +39,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <RainbowKitProvider 
       appInfo={{ appName: 'BridgeXchange' }}
       chains={chains}
-      theme={lightTheme({ accentColor: "black" })}
+      theme={darkTheme({ accentColor: "#27ffff", accentColorForeground: "#070029" })}
     >
-      <div className="min-h-screen text-lg">
+      <div className="min-h-screen text-lg bg-bg text-white">
         <Navbar />
         <Component {...pageProps} />
       </div>
