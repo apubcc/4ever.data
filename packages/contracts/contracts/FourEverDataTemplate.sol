@@ -117,7 +117,7 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
     struct cidProposal {
         uint256 proposalID;
         address storageProvider;
-        bytes32 cidRaw;
+        bytes32 cid;
         uint256 voteCount;
         uint256 minimumVotes;
         uint256 proposedAt;
@@ -638,8 +638,10 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
         return true;
     }
 
-    function createCIDProposal(bytes32 cidRaw) public {
+    function createCIDProposal() public returns (uint256 proposalID) {
         proposalCount++;
+        //create a random cidRaw
+        bytes32 cidRaw = keccak256(abi.encodePacked(proposalCount));
         cidProposal memory proposal = cidProposal(
             proposalCount,
             msg.sender,
@@ -652,6 +654,7 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
 
         cidProposals[proposalCount] = proposal;
         cidSet[cidRaw] = true;
+        return proposalCount;
     }
 
     function voteCIDProposal(uint256 proposalID) public {
