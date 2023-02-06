@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.17;
 
 // upgradeable proxy imports
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
