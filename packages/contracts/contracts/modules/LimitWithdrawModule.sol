@@ -5,19 +5,12 @@ pragma solidity ^0.8.9;
 import "../interfaces/IERC677.sol";
 import "./DataDAOModule.sol";
 import "../interfaces/IWithdrawModule.sol";
-import "../interfaces/IJoinListener.sol";
-import "../interfaces/ILeaveListener.sol";
 
 /**
  * @title DataDAO module that limits the amount of tokens that can be withdrawn
  * @dev setup: dataDAO.setWithdrawModule(this); dataDAO.addJoinListener(this); dataDAO.addLeaveListener(this);
  */
-contract LimitWithdrawModule is
-    DataDAOModule,
-    IWithdrawModule,
-    IJoinListener,
-    ILeaveListener
-{
+contract LimitWithdrawModule is DataDAOModule, IWithdrawModule {
     uint public requiredMemberAgeSeconds;
     uint public withdrawLimitPeriodSeconds;
     uint public withdrawLimitDuringPeriod;
@@ -68,22 +61,6 @@ contract LimitWithdrawModule is
             withdrawLimitDuringPeriod,
             minimumWithdrawTokenWei
         );
-    }
-
-    function onJoin(address newMember) external override onlyDataDAO {
-        memberJoinTimestamp[newMember] = block.timestamp;
-
-        // reset withdraw limit
-        delete blacklisted[newMember];
-    }
-
-    function onLeave(
-        address leavingMember,
-        MemberLeaveCode leaveCode
-    ) external override onlyDataDAO {
-        if (leaveCode == MemberLeaveCode.BANNED) {
-            blacklisted[leavingMember] = true;
-        }
     }
 
     function getWithdrawLimit(

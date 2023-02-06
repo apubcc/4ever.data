@@ -9,16 +9,12 @@ import "./interfaces/IFeeOracle.sol";
 import "./interfaces/IERC677.sol";
 import "./interfaces/IERC677Receiver.sol";
 import "./interfaces/IWithdrawModule.sol";
-import "./interfaces/IJoinListener.sol";
-import "./interfaces/ILeaveListener.sol";
-import "./interfaces/IPurchaseListener.sol";
-import "./MemberLeaveCode.sol";
 import {MarketAPI} from "@zondax/filecoin-solidity/contracts/v0.8/MarketAPI.sol";
 import {CommonTypes} from "@zondax/filecoin-solidity/contracts/v0.8/types/CommonTypes.sol";
 import {MarketTypes} from "@zondax/filecoin-solidity/contracts/v0.8/types/MarketTypes.sol";
 import {BigInt} from "@zondax/filecoin-solidity/contracts/v0.8/cbor/BigIntCbor.sol";
 
-contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
+contract FourEverDataTemplate is Ownable, IERC677Receiver {
     //identifiers to identify member and membership manager status
     enum Status {
         NONE,
@@ -28,9 +24,7 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
     //events
     event MemberJoined(address indexed member);
-    event MemberLeft(address indexed member, MemberLeaveCode leaveCode);
     event MembershipManagerAdded(address indexed agent);
-    event MembershipManagerRemoved(address indexed agent);
     event EthSentToNewMember(uint weiAmount);
     event MemberWeightChanged(
         address indexed member,
@@ -53,10 +47,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
     //modules, hooks
     event WithdrawModuleChanged(IWithdrawModule indexed withdrawModule);
-    event JoinListenedAdded(IJoinListener indexed joinListener);
-    event JoinListenedRemoved(IJoinListener indexed joinListener);
-    event LeaveListenedAdded(ILeaveListener indexed leaveListener);
-    event LeaveListenedRemoved(ILeaveListener indexed leaveListener);
 
     //in-contract transfers
     event TransferWithinContract(
@@ -91,9 +81,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
 
     //modules
     IWithdrawModule public withdrawModule;
-    address[] public joinListeners;
-    address[] public leaveListeners;
-    bool public modulesLocked;
 
     //variable properties
     uint256 public newMemberEth;
@@ -303,17 +290,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         refreshRevenue();
     }
 
-    function onPurchase(
-        bytes32,
-        address,
-        uint256,
-        uint256,
-        uint256
-    ) external override returns (bool) {
-        refreshRevenue();
-        return true;
-    }
-
     function getEarnings(address member) public view returns (uint256) {
         address daoAddress = address(this);
         MemberInfo storage info = memberData[member];
@@ -379,17 +355,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         daoStats.joinMembershipManagerCount++;
     }
 
-    function removeMembershipManager(address manager) public onlyOwner {
-        require(
-            joinMembershipManagers[manager] == Status.ACTIVE,
-            "error_notActiveMembershipManager"
-        );
-        Stats storage daoStats = stats[msg.sender];
-        joinMembershipManagers[manager] = Status.INACTIVE;
-        emit MembershipManagerRemoved(manager);
-        daoStats.joinMembershipManagerCount--;
-    }
-
     function addMember(address payable newMember) public onlyMembershipManager {
         address daoAddress = address(this);
         MemberInfo storage info = memberData[newMember];
@@ -406,45 +371,12 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         emit MemberJoined(newMember);
         _setMemberWeight(newMember, 1 ether);
 
-        for (uint i = 0; i < joinListeners.length; i++) {
-            address listener = joinListeners[i];
-            IJoinListener(listener).onJoin(newMember);
-        }
-
         if (sendEth) {
             if (newMember.send(newMemberEth)) {
                 emit EthSentToNewMember(newMemberEth);
             }
         }
         refreshRevenue();
-    }
-
-    function removeMember(address member, MemberLeaveCode leaveCode) public {
-        require(
-            msg.sender == member ||
-                joinMembershipManagers[msg.sender] == Status.ACTIVE,
-            "error_notPermitted"
-        );
-        require(isMember(member), "error_notActiveMember");
-        Stats storage daoStats = stats[msg.sender];
-        _setMemberWeight(member, 0);
-        memberData[member].status = Status.INACTIVE;
-        daoStats.activeMemberCount--;
-        daoStats.inactiveMemberCount++;
-        emit MemberLeft(member, leaveCode);
-
-        for (uint i = 0; i < leaveListeners.length; i++) {
-            address listener = leaveListeners[i];
-            try ILeaveListener(listener).onLeave(member, leaveCode) {} catch {}
-        }
-        refreshRevenue();
-    }
-
-    function partMember(address member) public {
-        removeMember(
-            member,
-            msg.sender == member ? MemberLeaveCode.SELF : MemberLeaveCode.AGENT
-        );
     }
 
     function setMemberWeight(
@@ -677,47 +609,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
     }
 
     /**
-     * @param newWithdrawModule set to zero to return to the default withdraw functionality
-     */
-    function setWithdrawModule(
-        IWithdrawModule newWithdrawModule
-    ) external onlyOwner {
-        require(!modulesLocked, "error_modulesLocked");
-        withdrawModule = newWithdrawModule;
-        emit WithdrawModuleChanged(newWithdrawModule);
-    }
-
-    function addJoinListener(IJoinListener newListener) external onlyOwner {
-        require(!modulesLocked, "error_modulesLocked");
-        joinListeners.push(address(newListener));
-        emit JoinListenedAdded(newListener);
-    }
-
-    function addPartListener(ILeaveListener newListener) external onlyOwner {
-        require(!modulesLocked, "error_modulesLocked");
-        leaveListeners.push(address(newListener));
-        emit LeaveListenedAdded(newListener);
-    }
-
-    function removeJoinListener(IJoinListener listener) external onlyOwner {
-        require(!modulesLocked, "error_modulesLocked");
-        require(
-            removeFromAddressArray(joinListeners, address(listener)),
-            "error_joinListenerNotFound"
-        );
-        emit JoinListenedRemoved(listener);
-    }
-
-    function removePartListener(ILeaveListener listener) external onlyOwner {
-        require(!modulesLocked, "error_modulesLocked");
-        require(
-            removeFromAddressArray(leaveListeners, address(listener)),
-            "error_partListenerNotFound"
-        );
-        emit LeaveListenedRemoved(listener);
-    }
-
-    /**
      * Remove the listener from array by copying the last element into its place so that the arrays stay compact
      */
     function removeFromAddressArray(
@@ -735,10 +626,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
         }
         array.pop();
         return true;
-    }
-
-    function lockModules() public onlyOwner {
-        modulesLocked = true;
     }
 
     function createCIDProposal(bytes calldata cidRaw, uint size) public {
@@ -784,50 +671,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver, IPurchaseListener {
             cidProposals[proposalID].voteCount >=
             cidProposals[proposalID].minimumVotes;
     }
-
-    // function publishStorageDeals(
-    //     uint256 proposalID,
-    //     uint64 size,
-    //     bytes calldata client,
-    //     bytes calldata provider,
-    //     bytes calldata storage_price_per_epoch,
-    //     bytes calldata client_signature
-    // ) public returns (MarketTypes.PublishStorageDealsReturn memory) {
-    //     bytes memory cidRaw = "000";
-    //     require(cidSet[cidRaw], "error_cidNotSet");
-    //     require(cidSizes[cidRaw] == size, "error_sizeNotMatch");
-    //     require(isPolicyOK(proposalID), "error_policyNotOKCannotAuthorizeData");
-    //     //set default client collateral to 0
-    //     bytes memory defaultClientCollateral = "0";
-    //     //set default provider collateral to 0
-    //     bytes memory defaultProviderCollateral = "0.1";
-    //     //set default label to "4ever.data - datasets"
-    //     string memory defaultLabel = "4ever.data - datasets";
-    //     int64 start_epoch = 0;
-    //     int64 end_epoch = 0;
-
-    //     CommonTypes.ClientDealProposal[]
-    //         memory deals = new CommonTypes.ClientDealProposal[](1);
-    //     deals[0] = CommonTypes.ClientDealProposal({
-    //         proposal: CommonTypes.DealProposal({
-    //             piece_cid: cidRaw,
-    //             piece_size: size,
-    //             verified_deal: true,
-    //             client: client,
-    //             provider: provider,
-    //             label: defaultLabel,
-    //             start_epoch: start_epoch,
-    //             end_epoch: end_epoch,
-    //             storage_price_per_epoch: BigInt(storage_price_per_epoch, false),
-    //             provider_collateral: BigInt(defaultProviderCollateral, false),
-    //             client_collateral: BigInt(defaultClientCollateral, false)
-    //         }),
-    //         client_signature: client_signature
-    //     });
-    //     MarketTypes.PublishStorageDealsParams memory params = MarketTypes
-    //         .PublishStorageDealsParams(deals);
-    //     return MarketAPI.publishStorageDeals(params);
-    // }
 
     function getSP(uint256 proposalID) public view returns (address) {
         return cidProposals[proposalID].storageProvider;

@@ -40,11 +40,11 @@ contract FourEverDataFactory is
     uint public defaultNewMemberInitialEth;
     address public FourEverDataFeeOracle;
     uint256 public numOfDataDao;
-    address public immutable dataDaoFactoryOwner;
+    address public dataDaoFactoryOwner;
     address public pendingOwner;
 
     struct dataDaoFactoryStruct {
-        address dataDaoOwner;
+        address dataDaoAddress;
         address dataDaoFactoryOwner;
     }
 
@@ -52,10 +52,6 @@ contract FourEverDataFactory is
 
     // owner address will be used check which address own/create a new dataDAO
     mapping(address => address) public searchByAddress;
-
-    constructor(address _dataDaoFactoryOwner) {
-        dataDaoFactoryOwner = _dataDaoFactoryOwner;
-    }
 
     function initialize(
         address _dataDAOTemplate,
@@ -67,6 +63,7 @@ contract FourEverDataFactory is
         setTemplate(_dataDAOTemplate);
         defaultToken = _defaultToken;
         FourEverDataFeeOracle = _DAOFeeOracle;
+        dataDaoFactoryOwner = msg.sender;
     }
 
     function setTemplate(address _dataDAOTemplate) public onlyOwner {

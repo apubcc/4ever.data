@@ -3,12 +3,9 @@
 pragma solidity ^0.8.9;
 
 import "../interfaces/IERC677.sol";
-import "../MemberLeaveCode.sol";
 
 interface IDataDAO {
     function owner() external returns (address);
-
-    function removeMember(address member, MemberLeaveCode leaveCode) external;
 
     function addMember(address newMember) external;
 
