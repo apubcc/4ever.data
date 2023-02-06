@@ -56,23 +56,24 @@ export default function Verify() {
   }, [router])
 
   return (
-    <div className="max-w-5xl m-auto px-4 lg:px-0 py-8">
+    <div className="max-w-6xl m-auto px-4 lg:px-0 py-8">
       {isConnected && (
         <>
           { data &&
             <div className="space-y-6">
-              <h1 className="text-4xl font-bold">{ data.name }</h1>
-              <p>{ data.desc }</p>
-              <p>Uploaded by: { data.uploader }</p>
-              <p>Size: { data.size }b</p>
-              <p>IPFS hash: { data.ipfs_hash }</p>
-              <p>Filecoin hash: { data.filecoin_hash }</p>
-              <p>
-                Dataset file: <a target="_blank" rel="noreferrer" href={`https://ipfs.io/ipfs/${data.ipfs_hash}`} className="text-blue-500 underline">{data.file_name}</a>
-              </p>
-              <button
-                className="px-4 py-3 font-medium text-white bg-black rounded-lg"
-              >
+              <h1 className="text-5xl font-bold">{ data.name }</h1>
+              <p className="text-2xl">{ data.desc }</p>
+
+              <div className="space-y-2 border-t-4 border-white py-3">
+                <p className="text-xl font-medium">Dataset Details:</p>
+                <p>Uploaded by: { data.uploader }</p>
+                <p>Size: { data.size }b</p>
+                <p>IPFS hash: { data.ipfs_hash }</p>
+                <p>
+                  Dataset file: <a target="_blank" rel="noreferrer" href={`https://ipfs.io/ipfs/${data.ipfs_hash}`} className="text-primary underline">{data.file_name}</a>
+                </p>
+              </div>
+              <button className="px-6 py-4 font-bold text-bg text-xl bg-primary">
                 Verify Dataset
               </button>
             </div>

@@ -56,22 +56,27 @@ export default function Datasets() {
   }, [router])
 
   return (
-    <div className="max-w-5xl m-auto px-4 lg:px-0 py-8">
+    <div className="max-w-6xl m-auto px-4 lg:px-0 py-8">
       {isConnected && (
         <>
           { data &&
             <div className="space-y-6">
               <h1 className="text-4xl font-bold">{ data.name }</h1>
               <p>{ data.desc }</p>
-              <p>Uploaded by: { data.uploader }</p>
-              <p>Size: { data.size }b</p>
-              <p>IPFS hash: { data.ipfs_hash }</p>
-              <p>Filecoin hash: { data.filecoin_hash }</p>
+
+              <div className="space-y-2 border-t-4 border-white py-3">
+                <p className="text-xl font-medium">Dataset Details:</p>
+                <p>Uploaded by: { data.uploader }</p>
+                <p>Size: { data.size }b</p>
+                <p>IPFS hash: { data.ipfs_hash }</p>
+                <p>Filecoin hash: { data.filecoin_hash }</p>
+              </div>
+
               <div className="flex gap-4 items-center">
                 <p>{ data.file_name}</p>
                 <a 
                   href=""
-                  className="inline-block px-4 py-3 font-medium text-white bg-black rounded-lg"
+                  className="px-6 py-4 font-bold text-bg text-xl bg-primary inline-block"
                   download
                 >
                   Download Dataset

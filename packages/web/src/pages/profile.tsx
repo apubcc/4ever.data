@@ -4,7 +4,7 @@ export default function Profile() {
   const { address, isConnected } = useAccount();
 
   return (
-    <div className="max-w-5xl m-auto px-4 lg:px-0 py-8">
+    <div className="max-w-6xl m-auto px-4 lg:px-0 py-8">
       {isConnected && (
         <>
           <div className="space-y-6">
