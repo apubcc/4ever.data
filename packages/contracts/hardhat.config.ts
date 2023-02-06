@@ -18,7 +18,6 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  defaultNetwork: "filecoinHyperspace",
   networks: {
     filecoinHyperspace: {
       chainId: 3141,
