@@ -62,7 +62,7 @@ export default function Datasets() {
           { data &&
             <div className="space-y-6">
               <h1 className="text-4xl font-bold">{ data.name }</h1>
-              <p>{ data.desc }</p>
+              <p className="text-xl">{ data.desc }</p>
 
               <div className="space-y-2 border-t-4 border-white py-3">
                 <p className="text-xl font-medium">Dataset Details:</p>
@@ -77,7 +77,7 @@ export default function Datasets() {
                 <a 
                   href=""
                   className="px-6 py-4 font-bold text-bg text-xl bg-primary inline-block"
-                  download
+                  download={data.file_name}
                 >
                   Download Dataset
                 </a>

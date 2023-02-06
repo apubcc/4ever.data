@@ -62,7 +62,7 @@ export default function Verify() {
           { data &&
             <div className="space-y-6">
               <h1 className="text-5xl font-bold">{ data.name }</h1>
-              <p className="text-2xl">{ data.desc }</p>
+              <p className="text-xl">{ data.desc }</p>
 
               <div className="space-y-2 border-t-4 border-white py-3">
                 <p className="text-xl font-medium">Dataset Details:</p>

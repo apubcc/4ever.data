@@ -31,7 +31,7 @@ export default function Home() {
   const [isOpen, toggleModal] = useModal();
 
   useEffect(() => {
-    supabase.from('datasets').select()
+    supabase.from('datasets').select().order('created_at', { ascending: false })
       .then(({ error, data }) => {
         if (error) {
           console.log(error)
@@ -70,14 +70,9 @@ export default function Home() {
                     { datasets.false.map((data) => (
                       <Card key={data.id} data={data} color="secondary" />
                     ))}
-                    { datasets.false.map((data) => (
-                      <Card key={data.id} data={data} color="secondary" />
-                    ))}
-                    { datasets.false.map((data) => (
-                      <Card key={data.id} data={data} color="secondary" />
-                    ))}
+                    
                     <p className="text-2xl text-white font-bold flex items-end gap-4">See all
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
                       </svg>
                     </p>
@@ -91,29 +86,9 @@ export default function Home() {
                     { datasets.true.map((data) => (
                       <Card key={data.id} data={data} color="tertiary" />
                     ))}
-                    { datasets.true.map((data) => (
-                      <Card key={data.id} data={data} color="tertiary" />
-                    ))}
-                    { datasets.true.map((data) => (
-                      <Card key={data.id} data={data} color="tertiary" />
-                    ))}
-                    { datasets.true.map((data) => (
-                      <Card key={data.id} data={data} color="tertiary" />
-                    ))}
-                    { datasets.true.map((data) => (
-                      <Card key={data.id} data={data} color="tertiary" />
-                    ))}
-                    { datasets.true.map((data) => (
-                      <Card key={data.id} data={data} color="tertiary" />
-                    ))}
-                    { datasets.true.map((data) => (
-                      <Card key={data.id} data={data} color="tertiary" />
-                    ))}
-                    { datasets.true.map((data) => (
-                      <Card key={data.id} data={data} color="tertiary" />
-                    ))}
+
                     <p className="text-2xl text-white font-bold flex items-end gap-4">See all
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
                       </svg>
                     </p>
