@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { Chat } from "@pushprotocol/uiweb";
 
 import { useModal } from '@/lib/hooks/useModal';
 import { Dataset } from '@/lib/interfaces';
@@ -25,7 +26,7 @@ import Modal from '@/components/Modal';
 
 export default function Home() {
   const [datasets, setDatasets] = useState<any>(null);
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const [isOpen, toggleModal] = useModal();
 
   useEffect(() => {
@@ -82,6 +83,12 @@ export default function Home() {
               )}
             </div>
             <Modal isOpen={isOpen} toggleModal={toggleModal} />
+            <Chat
+              account={address}
+              supportAddress="0xd9c1CCAcD4B8a745e191b62BA3fcaD87229CB26d" //support address
+              apiKey="jVPMCRom1B.iDRMswdehJG7NpHDiECIHwYMMv6k2KzkPJscFIDyW8TtSnk4blYnGa8DIkfuacU0"
+              env="staging"
+            />
           </>}
         </>
       )}
