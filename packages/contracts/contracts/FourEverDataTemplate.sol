@@ -131,6 +131,17 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
     // mapping array to track whether the user has voted for the proposal
     mapping(address => mapping(uint256 => bool)) public hasVotedForProposal;
 
+    string public dealLabel;
+    uint64 public dealClientActorId;
+    uint64 public dealProviderActorId;
+    bool public isDealActivated;
+    MarketTypes.GetDealDataCommitmentReturn public dealCommitment;
+    MarketTypes.GetDealTermReturn public dealTerm;
+    MarketTypes.GetDealEpochPriceReturn public dealPricePerEpoch;
+    MarketTypes.GetDealClientCollateralReturn public clientCollateral;
+    MarketTypes.GetDealProviderCollateralReturn public providerCollateral;
+    MarketTypes.GetDealActivationReturn public activationStatus;
+
     constructor() Ownable(address(0)) {}
 
     receive() external payable {}
@@ -684,69 +695,56 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
         return cidProposals[proposalID].proposalExpireAt > block.timestamp;
     }
 
-    function getBalances(
-        bytes memory addr
-    ) public returns (MarketTypes.GetBalanceReturn memory) {
-        return MarketAPI.getBalance(addr);
+    function storeDealLabel(uint64 dealId) public {
+        dealLabel = MarketAPI.getDealLabel(dealId).label;
     }
 
-    function getDealDataCommitment(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealDataCommitmentReturn memory) {
-        return MarketAPI.getDealDataCommitment(dealID);
+    function storeDealClient(uint64 dealId) public {
+        dealClientActorId = MarketAPI.getDealClient(dealId).client;
     }
 
-    function getDealClient(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealClientReturn memory) {
-        return MarketAPI.getDealClient(dealID);
+    function storeDealClientProvider(uint64 dealId) public {
+        dealProviderActorId = MarketAPI.getDealProvider(dealId).provider;
     }
 
-    function getDealProvider(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealProviderReturn memory) {
-        return MarketAPI.getDealProvider(dealID);
+    function storeDealCommitment(uint64 dealId) public {
+        dealCommitment = MarketAPI.getDealDataCommitment(dealId);
     }
 
-    function getDealLabel(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealLabelReturn memory) {
-        return MarketAPI.getDealLabel(dealID);
+    function storeDealTerm(uint64 dealId) public {
+        dealTerm = MarketAPI.getDealTerm(dealId);
     }
 
-    function getDealTerm(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealTermReturn memory) {
-        return MarketAPI.getDealTerm(dealID);
+    function storeDealTotalPrice(uint64 dealId) public {
+        dealPricePerEpoch = MarketAPI.getDealTotalPrice(dealId);
     }
 
-    function getDealTotalPrice(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealEpochPriceReturn memory) {
-        return MarketAPI.getDealTotalPrice(dealID);
+    function storeClientCollateral(uint64 dealId) public {
+        clientCollateral = MarketAPI.getDealClientCollateral(dealId);
     }
 
-    function getDealClientCollateral(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealClientCollateralReturn memory) {
-        return MarketAPI.getDealClientCollateral(dealID);
+    function storeProviderCollateral(uint64 dealId) public {
+        providerCollateral = MarketAPI.getDealProviderCollateral(dealId);
     }
 
-    function getDealProviderCollateral(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealProviderCollateralReturn memory) {
-        return MarketAPI.getDealProviderCollateral(dealID);
+    function storeDealVerificaton(uint64 dealId) public {
+        isDealActivated = MarketAPI.getDealVerified(dealId).verified;
     }
 
-    function getDealVerified(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealVerifiedReturn memory) {
-        return MarketAPI.getDealVerified(dealID);
+    function storeDealActivationStatus(uint64 dealId) public {
+        activationStatus = MarketAPI.getDealActivation(dealId);
     }
 
-    function getDealActivation(
-        uint64 dealID
-    ) public returns (MarketTypes.GetDealActivationReturn memory) {
-        return MarketAPI.getDealActivation(dealID);
+    function storeAll(uint64 dealId) public {
+        storeDealLabel(dealId);
+        storeDealClient(dealId);
+        storeDealClientProvider(dealId);
+        storeDealCommitment(dealId);
+        storeDealTerm(dealId);
+        storeDealTotalPrice(dealId);
+        storeClientCollateral(dealId);
+        storeProviderCollateral(dealId);
+        storeDealVerificaton(dealId);
+        storeDealActivationStatus(dealId);
     }
 }
