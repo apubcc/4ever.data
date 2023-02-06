@@ -108,7 +108,7 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
     // number of proposals currently in DAO
     uint256 public proposalCount;
     // mapping to check whether the cid is set for voting
-    mapping(bytes => bool) public cidSet;
+    mapping(bytes32 => bool) public cidSet;
     // storing the size of the cid
     mapping(bytes => uint) public cidSizes;
 
@@ -117,8 +117,7 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
     struct cidProposal {
         uint256 proposalID;
         address storageProvider;
-        bytes cidRaw;
-        uint size;
+        bytes32 cidRaw;
         uint256 voteCount;
         uint256 minimumVotes;
         uint256 proposedAt;
@@ -639,13 +638,12 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
         return true;
     }
 
-    function createCIDProposal(bytes calldata cidRaw, uint size) public {
+    function createCIDProposal(bytes32 cidRaw) public {
         proposalCount++;
         cidProposal memory proposal = cidProposal(
             proposalCount,
             msg.sender,
             cidRaw,
-            size,
             0,
             5,
             block.timestamp,
@@ -654,7 +652,6 @@ contract FourEverDataTemplate is Ownable, IERC677Receiver {
 
         cidProposals[proposalCount] = proposal;
         cidSet[cidRaw] = true;
-        cidSizes[cidRaw] = size;
     }
 
     function voteCIDProposal(uint256 proposalID) public {
