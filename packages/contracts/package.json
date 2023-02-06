@@ -7,7 +7,8 @@
     "compile": "pnpm hardhat compile",
     "dev": "pnpm run build && pnpm run deploy",
     "build": "pnpm clean && pnpm compile",
-    "deploy": "pnpm hardhat node"
+    "deploy": "pnpm hardhat run scripts/deploy.ts",
+    "node": "pnpm hardhat node"
   },
   "keywords": [],
   "author": "",
