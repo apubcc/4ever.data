@@ -74,7 +74,7 @@ For DAO members, the process is simple: label data or contribute high-quality da
 
 `Live Demo`
 
-[4Ever.Data](https://4ever-data.vercel.app/)
+[4Ever.Data](https://4everdotdata.me/)
 
 `Smart Contract`
 
