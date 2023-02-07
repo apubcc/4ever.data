@@ -72,8 +72,6 @@ For DAO members, the process is simple: label data or contribute high-quality da
 
 ## **Deployments ⛓️**
 
-//create two buttons of sort, one for live demo, another to link to smart contract on hyperspace
-
 `Live Demo`
 
 [4Ever.Data](https://4ever-data.vercel.app/)
