@@ -8,32 +8,26 @@
 
 ### **❗️Problem Statement ❗️**
 
-```
-
 1️⃣ Labeling data for machine learning is a challenging and time-consuming task that requires significant human effort.
 
 2️⃣ Data contributors often do not receive compensation for the valuable data they provide, leading to a lack of motivation for them to participate in the process.
 
 3️⃣ There is a growing concern about the use of biased datasets in training AI models, which can result in discriminatory outcomes.
-```
+
 
 ### **👀 Vision 👀**
 
-```
 
 🔥 4Ever.Data aims to revolutionize the way data is contributed, managed, and used in the AI industry. Our vision is to create a platform that incentivizes individuals and organizations to contribute high-quality data, while also ensuring that this data is free from biases and transparently available to all.
-```
+
 
 ### **💯 Unique Value Proposition 💯**
 
-```
 
 🚀 One of the key features of 4Ever.Data is our commitment to tracking bias metrics for each dataset. This helps to ensure that AI models are trained on fair and transparent data, which is critical for avoiding discriminatory outcomes.
-```
 
 ## **How It's Made 🛠️**
 
-```
 At the core of 4Ever.Data, we built a set of smart contracts on the Hyperspace testnet, designed to incentivize contributors and provide bias-checked datasets. Our goal is to revolutionize the AI industry and create a fairer, more transparent landscape for data labeling.
 
 To achieve this vision, we leveraged the cutting-edge technology provided by our sponsors - Lighthouse, Push Protocol, and Spheron network.
@@ -45,7 +39,6 @@ Push Protocol enabled us to facilitate intra-DAO communication in a seamless man
 Spheron Network was instrumental in making deployment easier, with server-side rendering via next.js and a custom root domain assigned through namecheap.
 
 For DAO members, the process is simple: label data or contribute high-quality datasets, and earn rewards based on the smart contract's determination of your contribution's earnings weight. With 4Ever.Data, everyone has the chance to directly contribute to crucial datasets and be a part of shaping the future of AI.
-```
 
 ## **The Stack ⚙️**
 
@@ -72,11 +65,11 @@ For DAO members, the process is simple: label data or contribute high-quality da
 
 ## **Deployments ⛓️**
 
-`Live Demo`
+### Live Demo
 
 [4Ever.Data](https://4everdotdata.me/)
 
-`Smart Contract`
+### Smart Contract
 
 [4Ever.Data Template](https://hyperspace.filfox.info/en/address/0x5FbDB2315678afecb367f032d93F642f64180aa3)
 
