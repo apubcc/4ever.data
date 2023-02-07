@@ -13,15 +13,15 @@ export default function Modal({ isOpen, toggleModal }: { isOpen: boolean, toggle
     e.preventDefault();
     setLoading(true);
     const { title, desc, file } = e.target
-    const babi = { 
+    const bullishOnLighthouse = { 
       persist: () => true,
       target: {
         files: file.files
       }
     }
     // @ts-ignore
-    const output = await lighthouse.upload(babi, process.env.NEXT_PUBLIC_LIGHTHOUSE_API_KEY)
-    console.log(output)
+    const output = await lighthouse.upload(bullishOnLighthouse, process.env.NEXT_PUBLIC_LIGHTHOUSE_API_KEY)
+    console.log('lighthouse upload output: ', output)
     if (!output || !output.data) {
       console.log('error: ', output)
       return
@@ -61,7 +61,6 @@ export default function Modal({ isOpen, toggleModal }: { isOpen: boolean, toggle
               <div className="flex flex-col">
                 <label htmlFor="file">Upload file</label>
                 <input 
-                  onChange={(e) => console.log('FUCKCKC', e)}
                   required  
                   type="file" 
                   id="file" 
