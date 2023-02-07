@@ -76,7 +76,7 @@ For DAO members, the process is simple: label data or contribute high-quality da
 
 [4Ever.Data](https://4ever-data.vercel.app/)
 
-`Smart Contract Deployments`
+`Smart Contract`
 
 [4Ever.Data Template](https://hyperspace.filfox.info/en/address/0x5FbDB2315678afecb367f032d93F642f64180aa3)
 
